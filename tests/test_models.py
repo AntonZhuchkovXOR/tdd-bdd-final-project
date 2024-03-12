@@ -107,6 +107,7 @@ class TestProductModel(unittest.TestCase):
     def test_read_a_product(self):
         """It should Read a product from database"""
         product = ProductFactory()
+        logging.info("%s", product)
         product.id = None
         product.create()
         self.assertIsNotNone(product.id)
@@ -116,3 +117,23 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(read_product.price, product.price)
         self.assertEqual(read_product.available, product.available)
         self.assertEqual(read_product.category, product.category)
+
+    def test_update_a_product(self):
+        """It should Update a product in database"""
+        product = ProductFactory()
+        logging.info("%s", product)
+        product.id = None
+        product.create()
+        self.assertIsNotNone(product.id)
+        logging.info("%s", product)
+        product.description = "testing update"
+        pid = product.id
+        product.update()
+        self.assertEqual(product.id, pid)
+        self.assertEqual(product.description, "testing update")
+        all_products = Product.all()
+        self.assertEqual(len(all_products), 1)
+        self.assertEqual(all_products[0].id, pid)
+        self.assertEqual(all_products[0].description, "testing update")
+
+
