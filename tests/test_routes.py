@@ -178,10 +178,26 @@ class TestProductRoutes(TestCase):
         self.assertEqual(pdata["category"], test_product.category.name)
         self.assertEqual(pdata["available"], test_product.available)
 
-    def test_get_product_not_found(self):
-        """It should return 404 error for reading of non-existing product"""
+    def test_product_not_found(self):
+        """It should return 404 error for operating with non-existing product"""
         res = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+        product = ProductFactory()
+        res = self.client.put(f"{BASE_URL}/0", json=product.serialize())
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_update_product(self):
+         """It should Update an existing Product"""
+         test_product = ProductFactory()
+         resp = self.client.post(BASE_URL, json=test_product.serialize())
+         self.assertEqual(resp.status_code, status.HTTP_201_CREATED)
+         product = resp.get_json()
+         product["description"] = "bla?"
+         resp = self.client.put(f"{BASE_URL}/{product['id']}", json=product)
+         self.assertEqual(resp.status_code, status.HTTP_200_OK)
+         data = resp.get_json()
+         self.assertEqual(data["description"], "bla?") 
+
 
     ######################################################################
     # Utility functions
