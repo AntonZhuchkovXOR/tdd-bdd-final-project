@@ -130,19 +130,15 @@ class TestProductRoutes(TestCase):
         self.assertEqual(new_product["available"], test_product.available)
         self.assertEqual(new_product["category"], test_product.category.name)
 
-        #
-        # Uncomment this code once READ is implemented
-        #
-
-        # # Check that the location header was correct
-        # response = self.client.get(location)
-        # self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # new_product = response.get_json()
-        # self.assertEqual(new_product["name"], test_product.name)
-        # self.assertEqual(new_product["description"], test_product.description)
-        # self.assertEqual(Decimal(new_product["price"]), test_product.price)
-        # self.assertEqual(new_product["available"], test_product.available)
-        # self.assertEqual(new_product["category"], test_product.category.name)
+        # Check that the location header was correct
+        response = self.client.get(location)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        new_product = response.get_json()
+        self.assertEqual(new_product["name"], test_product.name)
+        self.assertEqual(new_product["description"], test_product.description)
+        self.assertEqual(Decimal(new_product["price"]), test_product.price)
+        self.assertEqual(new_product["available"], test_product.available)
+        self.assertEqual(new_product["category"], test_product.category.name)
 
     def test_create_product_with_no_name(self):
         """It should not Create a Product without a name"""
@@ -166,6 +162,26 @@ class TestProductRoutes(TestCase):
     #
     # ADD YOUR TEST CASES HERE
     #
+
+    def test_invalid_method(self):
+        """You cannot use DELETE method on /products endpoint"""
+        resp = self.client.delete(f"{BASE_URL}")
+        self.assertEqual(resp.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+
+    def test_get_product(self):
+        """It should be able to get product by id"""
+        test_product = self._create_products()[0]
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        pdata = response.get_json()
+        self.assertEqual(pdata["name"], test_product.name)
+        self.assertEqual(pdata["category"], test_product.category.name)
+        self.assertEqual(pdata["available"], test_product.available)
+
+    def test_get_product_not_found(self):
+        """It should return 404 error for reading of non-existing product"""
+        res = self.client.get(f"{BASE_URL}/0")
+        self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     # Utility functions
